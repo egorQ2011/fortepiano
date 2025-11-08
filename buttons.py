@@ -1,4 +1,4 @@
-from pygame import Rect, mouse, transform, image,MOUSEBUTTONDOWN,draw
+from pygame import Rect, mouse, transform, image,MOUSEBUTTONDOWN, draw
 
 class Button:
     def __init__(self,x,y, width, height, text:str="", 
@@ -29,3 +29,26 @@ class Button:
     def draw(self,surface,font):
         mouse_pos = mouse.get_pos()
         is_hovered = self.rect.collidepoint(mouse_pos)
+
+        if self.use_image:
+            surf = (self.image_hover if (hovered and self.img_hover)else self.img_idle)
+            if surf.get_size() != (self.rect.w,self.rect.h):
+                surf = transform.scale(surf,self.rect.w,self.img_idle)
+            surface.blit(surf,self.rect.topleft)
+
+            if self.text:
+                text_surf = font.render(self.text,  True, self.text_color)
+                surface.blit(text_surf, text_surf.get_rect(center=self.rect.center))
+        else:
+            color = self.color_hover if hovered else self.color_idle
+            draw.rect(surface,color,self.rect,border_radius=8)
+            draw.rect(surface,self.color_border,self.rect,2,border_radius=8)
+
+            if self.text:
+                text_surf = font.render(self.text,True,self.text_color)
+                surface.blit(text_surf, text_surf.get_rect(center=self.rect.center))
+
+    def handle_event(self,event):
+        if event.type == MOUSEBUTTONDOWN and self.rect.collidepoint(event.pos):
+            if self.action:
+                self.action()  
